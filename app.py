@@ -15,7 +15,7 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api/v1")
 ktp_router = APIRouter(prefix="/ktp")
 
-weights = os.environ.get('MODEL_PATH', 'yolov5s.pt')
+weights = os.environ.get('MODEL_PATH', 'runs/train/exp10/weights/best.pt')
 device = select_device('')
 model = DetectMultiBackend(weights, device=device, dnn=False, data=None, fp16=False)
 stride = model.stride
@@ -88,16 +88,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 center_left = w * 0.4
                 center_right = w * 0.6
 
-                if box_w < w * 0.9:
-                    msg = "KTP kurang dekat"
-                elif box_w > w * 0.995:
-                    msg = "KTP terlalu dekat"
+                if box_w < w * 0.6:
+                    msg = "KAMERA KURANG DEKAT"
+                elif box_w > w * 0.9:
+                    msg = "KAMERA TERLALU DEKAT"
                 elif cx < center_left:
-                    msg = "KTP geser ke kanan"
+                    msg = "KAMERA GESER ke KIRI"
                 elif cx > center_right:
-                    msg = "KTP geser ke kiri"
+                    msg = "KAMERA GESER ke KANAN"
                 else:
-                    msg = "OK"
+                    msg = "POSISI SUDAH TEPAT"
 
                 result = {
                     "bbox": [float(x1), float(y1), float(x2), float(y2)],
@@ -107,7 +107,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     "message": msg
                 }
             else:
-                result = {"message": "KTP tidak terdeteksi"}
+                result = {"message": "KTP TIDAK TERDETEKSI"}
 
             await websocket.send_json(result)
 
